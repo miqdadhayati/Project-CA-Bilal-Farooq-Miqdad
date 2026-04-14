@@ -1,0 +1,42 @@
+// ============================================================
+// Task B Test Program: LUI, SLTI, BLT
+// Tests all three new instructions with display output
+// Display address: 0x200 (512)
+// ============================================================
+// x9 holds display address throughout
+//
+// --- Test 1: LUI ---
+// 0x00: ABCDE0B7  lui   x1, 0xABCDE      | x1 = 0xABCDE000
+// 0x04: 00008113  addi  x2, x1, 0         | x2 = x1 (copy for verification)
+// 0x08: 20000493  addi  x9, x0, 512       | x9 = display address
+// 0x0C: 0014A023  sw    x1, 0(x9)         | display <- 0xABCDE000
+//
+// --- Test 2: SLTI ---
+// 0x10: 00500193  addi  x3, x0, 5         | x3 = 5
+// 0x14: 00A1A213  slti  x4, x3, 10        | x4 = 1  (5 < 10 TRUE)
+// 0x18: 0031A293  slti  x5, x3, 3         | x5 = 0  (5 < 3  FALSE)
+// 0x1C: FFF1A313  slti  x6, x3, -1        | x6 = 0  (5 < -1 FALSE, signed)
+// 0x20: 0044A023  sw    x4, 0(x9)         | display <- 1
+//
+// --- Test 3: BLT (taken) ---
+// 0x24: 00300393  addi  x7, x0, 3         | x7 = 3
+// 0x28: 00700413  addi  x8, x0, 7         | x8 = 7
+// 0x2C: 0083C663  blt   x7, x8, +12       | 3 < 7 => TAKEN -> 0x38
+// 0x30: 00000513  addi  x10, x0, 0        | FAIL (skipped if BLT taken)
+// 0x34: 0080006F  jal   x0, +8            | jump over PASS -> 0x3C
+// 0x38: 00100513  addi  x10, x0, 1        | PASS (BLT landed here)
+// 0x3C: 00A4A023  sw    x10, 0(x9)        | display <- 1 if correct
+//
+// --- Test 4: BLT (not taken) ---
+// 0x40: 00744663  blt   x8, x7, +12       | 7 < 3 => NOT TAKEN
+// 0x44: 00200593  addi  x11, x0, 2        | PASS (BLT correctly not taken)
+// 0x48: 0080006F  jal   x0, +8            | jump over FAIL -> 0x50
+// 0x4C: 00000593  addi  x11, x0, 0        | FAIL (shouldn't reach here)
+// 0x50: 00B4A023  sw    x11, 0(x9)        | display <- 2 if correct
+//
+// --- HALT ---
+// 0x54: 0000006F  jal   x0, 0             | infinite loop
+//
+// ============================================================
+// Expected display sequence: 0xABCDE000 -> 1 -> 1 -> 2
+// ============================================================
